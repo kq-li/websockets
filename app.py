@@ -8,11 +8,20 @@ socketio = SocketIO(app)
 
 def run():
     port = int(os.environ.get('PORT', 5000))
-    socketio.run(app, host = '0.0.0.0', port = port)
+    debug = False
+    
+    if port == 5000:
+        debug = True
+        
+    socketio.run(app, host = '0.0.0.0', port = port, debug = debug)
 
 @app.route('/')
 def root():
-    return redirect(url_for('chat'))
+    return redirect(url_for('presentation'))
+
+@app.route('/presentation/')
+def presentation():
+    return render_template('presentation.html')
 
 @app.route('/chat/')
 def chat():
