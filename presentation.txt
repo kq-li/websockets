@@ -1,0 +1,11 @@
+WebSocket
+    Protocol for real-time, full-duplex communication
+    Replaces HTTP (HTTP Upgrade for handshake)
+    TCP connection
+    URIs prefixed by ws:// or wss://
+
+SocketIO
+    Commonly used wrapper/extension library for websockets
+    Not exactly a wrapper, requires SocketIO on both ends
+    Powerful bidrectional communications setup
+    
