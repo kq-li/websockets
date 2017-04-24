@@ -65,7 +65,7 @@
                         </h3>
                         <div class="section">
                             <p>
-                                on() is a function that takes two parameters and begins listening for a packet from the server.
+                                A function that takes two parameters and begins listening for a packet from the server.
                             </p>
                             <p>
                                 The name parameter specifies the name of the packet to listen for.
@@ -79,7 +79,7 @@
                         </h3>
                         <div class="section">
                             <p>
-                                emit() is a function that takes two parameters and emits a packet to the server.
+                                A function that takes two parameters and emits a packet to the server.
                             </p>
                             <p>
                                 The name parameter designates a name for the packet.
@@ -95,7 +95,7 @@
                         </h3>
                         <div class="section">
                             <p>
-                                on() is a decorator that takes one parameter and listens for a packet from the client.
+                                A decorator that takes one parameter and listens for a packet from the client.
                             </p>
                             <p>
                                 The name parameter specifies the name of the packet to listen for.
@@ -109,7 +109,7 @@
                         </h3>
                         <div class="section">
                             <p>
-                                emit() is a function that takes two parameters and sends a packet to all clients.
+                                A function that takes two parameters and sends a packet to all clients.
                             </p>
                             <p>
                                 The name parameter specifies the name to send the packet under.
@@ -133,12 +133,310 @@
             <p>
                 We can use our newfound knowledge of SocketIO to build a basic chat client. Our chat client will need a server to process messages and connections from many clients.
             </p>
+            <p>
+                This example uses the following folder hierarchy:
+            </p>
+            <pre>
+project/
+    static/
+        js/
+            chat.js
+            socket.io.js
+            jquery.min.js
+
+        css/
+            chat.css
+
+    templates/
+        chat.html
+
+    app.py</pre>
             {% call render_toggle() %}
                 {% call client() %}
+                    <p>
+                        (We will be using jQuery to streamline the JavaScript coding process.)
+                    </p>
+                    <p>
+                        First, we begin with the following template and corresponding stylesheet.
+                    </p>
+                    <h3>
+                        chat.html
+                    </h3>
+                    <pre>
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;
+            Chat
+        &lt;/title&gt;
+        &lt;link rel="stylesheet" type="text/css" href="/static/css/chat.css"&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;!--&lt;div id="name-container"&gt;
+            &lt;form id="name-form"&gt;
+                &lt;input class="text" id="name-text" type="text" name="name"&gt;&lt;input class="button" id="name-button" type="submit" name="submit" value="Submit"&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;--&gt;
+        &lt;div id="chat-container"&gt;
+            &lt;textarea class="text" id="chat-log" readonly&gt;&lt;/textarea&gt;
+            &lt;br&gt;
+            &lt;form id="chat-form"&gt;
+                &lt;input class="text" id="chat-text" type="text" name="message"&gt;&lt;input class="button" id="chat-button" type="submit" name="submit" value="Send"&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+        &lt;script type="text/javascript" src="/static/js/jquery.min.js"&gt;&lt;/script&gt;
+        &lt;script type="text/javascript" src="/static/js/socket.io.min.js"&gt;&lt;/script&gt;
+        &lt;script type="text/javascript" src="/static/js/chat.js"&gt;&lt;/script&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</pre>
+                    <h3>
+                        chat.css
+                    </h3>
+                    <pre>
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: 'DejaVu Sans Mono', monospace;
+}
+
+#name-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: rgba(150, 150, 150, 0.5);
+    z-index: 100;
+    text-align: center;
+}
+
+#name-form {
+    width: 440px;
+    border-radius: 5px;
+    background-color: #EEE;
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative;
+    top: 40%;
+    left: 50%;
+    margin-left: -200px;
+    opacity: 1.0;
+    z-index: 101;
+    text-align: left;
+}
+
+#chat-container {
+    width: 100%;
+    height: 100%;
+    padding: 50px;
+    box-sizing: border-box;
+    position: absolute;
+}
+
+.text {
+    border: 1px solid gray;
+    border-radius: 5px;
+    font-size: 12px;
+    font-family: 'DejaVu Sans Mono', monospace;
+    margin: 0;
+    padding: 2px;
+    box-sizing: border-box;
+}
+
+#name-text {
+    width: 320px;
+    height: 30px;
+}
+
+#chat-log {
+    width: 600px;
+    height: 300px;
+    resize: none;
+}
+
+#chat-text {
+    width: 540px;
+    height: 30px;
+}
+
+.button {
+    box-sizing: border-box;
+    border: 1px solid gray;
+    background-color: #999;
+    color: white;
+    border-radius: 5px;
+    font-family: 'DejaVu Sans Mono', monospace;
+    cursor: pointer;
+}
+
+#name-button {
+    width: 70px;
+    height: 30px;
+    margin-left: 10px;
+}
+
+#chat-button {
+    width: 50px;
+    height: 30px;
+    margin: 0;
+    margin-left: 10px;
+    background-color: green;
+}</pre>
+                    <p>
+                        In a JavaScript file we import into the template (named chat.js), we start by initializing the SocketIO library:
+                    </p>
+                    <pre>
+$(document).ready(function () {
+  var socket = io();
+}</pre>
+                    <p>
+                        Next, we want to set up the sending and receiving of messages.
+                    </p>
+                    <p>
+                        Our message packets should trigger the 'new_message' listener and contain the name of the sender and the message to be sent, and the message should be sent upon submission of the '#chat-form'.
+                    </p>
+                    <pre>
+$('#chat-form').submit(function () {
+    var message = $('#chat-text').val(); // fetch value of input box
+    var name = 'test'; // hardcoded for now
+
+    if (message.length > 0) { // restrict empty message
+        socket.emit('new_message', {
+            name: name,
+            message: message
+        });
+    }
+
+    $('#chat-text').val(''); // reset chat input box
+
+    return false; // prevent page from reloading
+});</pre>
+                    <p>
+                        Here, we use socket.emit() to send the packet to the server.
+                    </p>
+                    <p>
+                        We'll also need to listen for server packets, specifically 'chat_message' packets, and process them.
+                    </p>
+                    <pre>
+socket.on('chat_message', function (data) {
+    $('#chat-log').append(data['name'] + ': ' + data['message'] + '\n');
+    $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight); // keep chat scrolled to bottom
+});</pre>
+                    <p>
+                        This will add any new messages received to the chat log.
+                    </p>
                 {% endcall %}
                 {% call server() %}
+                    <p>
+                        We will write our server as a Flask app. Flask-SocketIO essentially wraps itself around the base Flask app functionality and adds new decorators to designate packet listeners.
+                    </p>
+                    <p>
+                        First, we initialize the app, Flask-style, and wrap it in a SocketIO object.
+                    </p>
+                    <pre>
+app = Flask(__name__)
+socketio = SocketIO(app)</pre>
+                    <p>
+                        We'll have to import these names from their respective pip packages.
+                    </p>
+                    <pre>
+from flask import Flask
+from flask_socketio imponrt SocketIO</pre>
+                    <p>
+                        Next, we can define a route to return our HTML template. (We should also add render_template to our Flask imports.
+                    </p>
+                    <pre>
+@app.route('/chat/')
+def chat():
+    render_template('chat.html')</pre>
+                    <p>
+                        Now, we want to process the chat packets. The chat process is as follows: the sending client sends a 'new_message' packet to the server, then the server broadcasts a 'chat_message' packet to all clients. We can simply pass the data from the 'new_message' packet as the 'chat_message' packet.
+                    </p>
+                    <pre>
+@socketio.on('new_message')
+def new_message(data):
+    socketio.emit('chat_message', data)</pre>
+                    <p>
+                        Note that in a more complex use case, this data might be processed differently and a different object might be passed as the response packet, or packets might be triggered at different times.
+                    </p>
+                    <p>
+                        Finally, we have to be able to run the server.
+                    </p>
+                    <pre>
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000)) // useful for hosting services, import os accordingly
+    socketio.run(app, host = '0.0.0.0', port = port) // debug = True might serve you well here</pre>
                 {% endcall %}
             {% endcall %}
+            <p>
+                And thus we have a basic chat client! The final files should resemble the following:
+            </p>
+            {% call render_toggle() %}
+                {% call client() %}
+                    <h3>
+                        chat.js
+                    </h3>
+                    <pre>
+$(document).ready(function () {
+    var socket = io();
+    var name = 'test';
+
+    $('#chat-form').submit(function () {
+        var message = $('#chat-text').val();
+
+        if (message.length > 0) {
+            socket.emit('new_message', {
+                name: name,
+                message: message
+            });
+        }
+
+        $('#chat-text').val('');
+        
+        return false;
+    });
+    
+    socket.on('chat_message', function (data) {
+        $('#chat-log').append(data['name'] + ': ' + data['message'] + '\n');
+        $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+
+    });
+});</pre>
+                {% endcall %}
+                {% call server() %}
+                    <h3>
+                        app.py
+                    </h3>
+                    <pre>
+from flask import Flask, render_template
+from flask_socketio import SocketIO
+import os
+
+app = Flask(__name__)
+socketio = SocketIO(app)
+
+def run():
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, host = '0.0.0.0', port = port)
+
+@app.route('/chat/')
+def chat():
+    return render_template('chat.html')
+
+@socketio.on('new_message')
+def new_message(data):
+    socketio.emit('chat_message', data)
+
+if __name__ == '__main__':
+    run()</pre>
+                {% endcall %}
+            {% endcall %}
+            <p>
+                Some additional features to implement are allowing the user to input a name (comment out the '#name-form' in the template!) and sending connected/disconnected events to the server.
+            </p>
+            <p>
+                You can see this example (plus the above features) live <a href='/chat/'>here</a>.
+            </p>
         </div>
         <script src="/static/js/jquery.min.js"></script>
         <script src="/static/js/presentation.js"></script>

@@ -1,6 +1,5 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template
 from flask_socketio import SocketIO
-import json
 import os
 
 app = Flask(__name__)

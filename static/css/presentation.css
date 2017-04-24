@@ -41,3 +41,10 @@ body {
     padding: 5px;
     cursor: pointer;
 }
+
+pre {
+    margin: 10px;
+    padding: 10px;
+    background-color: #eeeeee;
+    //font-family: 'DejaVu Sans Mono', monospace;
+}
